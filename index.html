@@ -61,6 +61,94 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-valueAnimator" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/07/13/valueAnimator/" class="article-date">
+  <time datetime="2017-07-13T08:27:53.000Z" itemprop="datePublished">2017-07-13</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <hr>
+<h2 id="title-浅谈-Android-ValueAnimator"><a href="#title-浅谈-Android-ValueAnimator" class="headerlink" title="title:浅谈 Android ValueAnimator"></a>title:浅谈 Android ValueAnimator</h2><p>Android 3.0之后动画氛围两种</p>
+<ol>
+<li><p>View Animation</p>
+<ul>
+<li><p>Tween Animation</p>
+<p>可以实现简单的 旋转(rotate) 平移(translate) 缩放(scale) 透明度变化(alpha)</p>
+</li>
+<li><p>Frame Animation</p>
+<p>补间动画，其实就是把一张张图片播放出来</p>
+</li>
+</ul>
+</li>
+<li><p>Property Animation (3.0 level11 以后安卓官方支持)</p>
+<ul>
+<li>ObjectAnimation 作用于控件的某一个属性（本篇略）</li>
+<li>ValueAnimator</li>
+</ul>
+</li>
+</ol>
+<h4 id="ValueAnimator"><a href="#ValueAnimator" class="headerlink" title="ValueAnimator"></a>ValueAnimator</h4><p>ValueAnimation本身并不会与任何一个属性发生作用，它本身也不提供任何动画。简单来说，ValueAnimation就是一个<br>数值发生器。它可以生产你想要的各种数值。其实，在Android属性动画中，如何产生每一步具体实现动画，都是通过<br>ValueAnimator计算出来的。</p>
+<p>比如我们现在要实现一个从0~100的位移动画，ValueAnimator会根据动画持续的总时间产生一个0~1时间因子，<br>有了这样一个时间因子。通过相应的变幻，就可以根据你的startValue和endValue来生成相应的值。<br>同时，通过插值器的使用，我们还可以进一步控制每一个时间因子它产生值的一个变化速率。<br>如果我们使用线性插值器，那么它生成数值的时候，就会形成一个线性变化，只要时间相同，它的增量也相同。<br>如果我们使用一个加速度的插值器，那么它的增量变化就会呈现一个二次曲线图。增长率会越来越快。<br>由于我们的ValueAnimator并不响应任何一个动画，也不能控制任何一个属性，所以它并没有ObjectAnimator使用的那么广泛。<br>我们还是来看一下如何在程序中使用ValueAnimator吧。</p>
+<p>下面我们利用ValueAnimator做一个水平方向初速度的抛物线<br>首先我们把抛物线分解成一个竖直方向（加速度恒定的直线运动）的运动和一个水平方向（匀速直线运动）的运动</p>
+<ol>
+<li>水平方向的运动<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">ValueAnimator animator = ValueAnimator.ofFloat(0,1);</div><div class="line">        animator.setDuration(1000).start();</div><div class="line">        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() &#123;</div><div class="line">            @Override</div><div class="line">            public void onAnimationUpdate(ValueAnimator animation) &#123;</div><div class="line">                myView.setTranslationX((Float) animation.getAnimatedValue()*(屏幕款或者高));</div><div class="line">            &#125;</div><div class="line">        &#125;);</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>以上代码其实就是，通过ValueAnimator产生了一个从0到1的不断均匀变化的值。然后我们设置一个监听在监听方法的会调离处理数据实现动画便ok了</p>
+<ol>
+<li>抛物线<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">public void paowuxian(View view)&#123;</div><div class="line">        ValueAnimator valueAnimator = new ValueAnimator();</div><div class="line">        valueAnimator.setDuration(1000);</div><div class="line">        valueAnimator.setObjectValues(new PointF(0,0));</div><div class="line">        valueAnimator.setInterpolator(new LinearInterpolator());</div><div class="line"></div><div class="line">        valueAnimator.setEvaluator(new TypeEvaluator() &#123;</div><div class="line">            @Override</div><div class="line">            public Object evaluate(float fraction, Object startValue, Object endValue) &#123;</div><div class="line">                Log.e(&quot;PaowuxianAc&quot;, fraction * 3 + &quot;&quot;);</div><div class="line">                // x方向200px/s ，则y方向0.5 * 10 * t</div><div class="line">                PointF point = new PointF();</div><div class="line">                point.x = 200 * fraction * 3;</div><div class="line">                point.y = 0.5f * 200 * (fraction * 3) * (fraction * 3);</div><div class="line">                return point;</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line"></div><div class="line">        valueAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() &#123;</div><div class="line">            @Override</div><div class="line">            public void onAnimationUpdate(ValueAnimator animation) &#123;</div><div class="line">                PointF pointF = (PointF) animation.getAnimatedValue();</div><div class="line">                mBlueBall.setTranslationY(pointF.y);</div><div class="line">                mBlueBall.setTranslationX(pointF.x);</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line">        valueAnimator.start();</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>这里有两个方法：</p>
+<ul>
+<li>setEvaluator<br>我们需要自定义的数值，那么久需要new出TypeEvaluator，通过重写evaluate()这个方法，可以返回各种各样我们想要的值，<br>它的第一个参数fraction就是前面说到的时间因子，它是一个从0-1之间变化的值，还有startValue参数和endValue参数，<br>这些参数结合起来通过各种各样的计算方式，就可以产生所有我们想要产生的值。这里不光能产生普通的数据结构，<br>通过泛型同样可以定义更加复杂的数据结构。</li>
+<li>setInterpolator<br>这个方法是给ValueAnimator设置一个差值器，说简单点就是控制从0-1的变化规律，在说的详细一点就是控制从0-1这条线每个点的斜率<br>上面用到了LinearInterpolator()，其实就是一条直线（斜率是一定的）。其他插值器还有：<ul>
+<li>AccelerateInterpolator</li>
+<li>AnticipateInterpolator</li>
+<li>DecelerateInterpolator</li>
+<li>BounceInterpolator</li>
+<li>OvershootInterpolator<br>根据不同的需求我们可以采用不同插值器，上面的每个插值器对应怎样的变换，可以稍微google一下。</li>
+</ul>
+</li>
+</ul>
+<p>总结</p>
+<ol>
+<li><p>动画常用的一些属性：<br>translationX\translationY  水平和垂直方向偏移</p>
+<p>rotation、rotationX\rotationY  rotation指3D翻转，rotationX\rotationY指水平和竖直方向的一个旋转动画</p>
+<p>scaleX\scaleY  X轴方向，和Y轴方向缩放的一个动画</p>
+<p>X\Y  具体会移动到某一个点</p>
+<p>alpha  透明度动画</p>
+</li>
+<li><p>常用的方法、类<br>ValueAnimator  数值发生器</p>
+<p>ObjectAnimator  是ValueAnimator的一个子类，它封装了ValueAnimator，可以更轻松的使用属性动画</p>
+<p>AnimatorUpdateListener</p>
+<p>AnimatorListenerAdapter  这2个是用来做监听事件的</p>
+<p>PropertyValuesHolder</p>
+<p>AnimatorSet  这2个用来控制集合动画的一个显示效果、顺序</p>
+<p>TypeEvaluators  值计算器</p>
+<p>Interpolators  插值器，用来控制具体数值的变化规律</p>
+</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/07/13/valueAnimator/" data-id="cj526b7lb0002hni2wqr8edw3" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-android-handler" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/07/07/android-handler/" class="article-date">
@@ -136,7 +224,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/07/android-handler/" data-id="cj4tlmtnr0001jni25997g6fy" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/07/android-handler/" data-id="cj526b7kt0000hni2tw7khcay" class="article-share-link">Share</a>
       
       
     </footer>
@@ -181,7 +269,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/06/hello-world/" data-id="cj4tlmtnn0000jni2bft6ea8f" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/06/hello-world/" data-id="cj526b7l90001hni23et9d207" class="article-share-link">Share</a>
       
       
     </footer>
@@ -219,6 +307,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/07/13/valueAnimator/">(no title)</a>
+          </li>
         
           <li>
             <a href="/2017/07/07/android-handler/">Android Handler 消息循环机制源码分析等</a>
