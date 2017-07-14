@@ -63,8 +63,8 @@
   
     <article id="post-valueAnimator" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2017/07/13/valueAnimator/" class="article-date">
-  <time datetime="2017-07-13T08:34:21.000Z" itemprop="datePublished">2017-07-13</time>
+    <a href="/2017/07/14/valueAnimator/" class="article-date">
+  <time datetime="2017-07-14T06:49:00.000Z" itemprop="datePublished">2017-07-14</time>
 </a>
     
   </div>
@@ -75,7 +75,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/13/valueAnimator/">浅谈 Android ValueAnimator</a>
+      <a class="article-title" href="/2017/07/14/valueAnimator/">浅谈 Android ValueAnimator</a>
     </h1>
   
 
@@ -116,7 +116,11 @@
 </ol>
 <p>这里有两个方法：</p>
 <ul>
-<li>setEvaluator<br>我们需要自定义的数值，那么久需要new出TypeEvaluator，通过重写evaluate()这个方法，可以返回各种各样我们想要的值，<br>它的第一个参数fraction就是前面说到的时间因子，它是一个从0-1之间变化的值，还有startValue参数和endValue参数，<br>这些参数结合起来通过各种各样的计算方式，就可以产生所有我们想要产生的值。这里不光能产生普通的数据结构，<br>通过泛型同样可以定义更加复杂的数据结构。</li>
+<li><p>setEvaluator<br>我们需要自定义的数值，那么久需要new出TypeEvaluator，通过重写evaluate()这个方法，可以返回各种各样我们想要的值，<br>它的第一个参数fraction就是前面说到的时间因子，它是一个从0-1之间变化的值，还有startValue参数和endValue参数，<br>这些参数结合起来通过各种各样的计算方式，就可以产生所有我们想要产生的值。这里不光能产生普通的数据结构，<br>通过泛型同样可以定义更加复杂的数据结构。</p>
+<p>还有就是可以自定义一个TypeEvaluator 通过ofObject直接使用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Point point1 = new Point(0, 0);</div><div class="line">Point point2 = new Point(300, 300);</div><div class="line">ValueAnimator anim = ValueAnimator.ofObject(new PointEvaluator(), point1, point2);</div></pre></td></tr></table></figure>
+<p>这里谈一下对XXXAnimator.ofXXX()方法的理解，android自带的常用方法有ofFloat和ofInt，接受的参数分别是<br>float类型和int类型，那么如果我想让动画在两个point之间运动，这时候我们就需要调用ofObject方法了，直接调用<br>ofObject方法ValueAnimator内部并没有相对于的解析，所以我们需要自定义一个TypeEvaluator，并重写evaluate方法。</p>
+</li>
 <li>setInterpolator<br>这个方法是给ValueAnimator设置一个差值器，说简单点就是控制从0-1的变化规律，在说的详细一点就是控制从0-1这条线每个点的斜率<br>上面用到了LinearInterpolator()，其实就是一条直线（斜率是一定的）。其他插值器还有：<ul>
 <li>AccelerateInterpolator</li>
 <li>AnticipateInterpolator</li>
@@ -148,7 +152,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/13/valueAnimator/" data-id="cj526iwah0001nti2a8bg88e8" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/14/valueAnimator/" data-id="cj53i7tus0000b5i2pjeowcg5" class="article-share-link">Share</a>
       
       
     </footer>
@@ -233,7 +237,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/07/android-handler/" data-id="cj526iwac0000nti29w2jb9n9" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/07/android-handler/" data-id="cj53i7tux0001b5i2qeopmqzz" class="article-share-link">Share</a>
       
       
     </footer>
@@ -278,7 +282,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/06/hello-world/" data-id="cj526iwaj0002nti2ib3inibs" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/07/06/hello-world/" data-id="cj53i7tv00002b5i2wpqpkzf8" class="article-share-link">Share</a>
       
       
     </footer>
@@ -318,7 +322,7 @@
       <ul>
         
           <li>
-            <a href="/2017/07/13/valueAnimator/">浅谈 Android ValueAnimator</a>
+            <a href="/2017/07/14/valueAnimator/">浅谈 Android ValueAnimator</a>
           </li>
         
           <li>
