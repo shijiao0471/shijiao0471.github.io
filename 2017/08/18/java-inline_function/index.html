@@ -5,16 +5,16 @@
   
   <title>浅谈 Inline(内联)函数 | Johnny</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="为什么会出现内联函数？要回答这个问题，首先说说方法的调用过程：  调用某个函数实际上将程序执行顺序转移到该方法所存放在内存中的某个地址，再返回到转去执行该函数前的地方。这种转移操作要求在转去前要保护现场并记忆执行的地址，转回后先要恢复现场，并按原来保存地址继续执行。也就是通常说的压栈和出栈。因此，函数调用要有一定的时间和空间方面的开销。那么对于那些函数体代码不是很大，又频繁调用的函数来说，这个时间">
+  <meta name="description" content="为什么会出现内联函数？要回答这个问题，首先说说方法的调用过程： 调用某个函数实际上将程序执行顺序转移到该方法所存放在内存中的某个地址，再返回到转去执行该函数前的地方。这种转移操作要求在转去前要保护现场并记忆执行的地址，转回后先要恢复现场，并按原来保存地址继续执行。也就是通常说的压栈和出栈。因此，函数调用要有一定的时间和空间方面的开销。那么对于那些函数体代码不是很大，又频繁调用的函数来说，这个时间和">
 <meta property="og:type" content="article">
 <meta property="og:title" content="浅谈 Inline(内联)函数">
 <meta property="og:url" content="http://yoursite.com/2017/08/18/java-inline_function/index.html">
 <meta property="og:site_name" content="Johnny">
-<meta property="og:description" content="为什么会出现内联函数？要回答这个问题，首先说说方法的调用过程：  调用某个函数实际上将程序执行顺序转移到该方法所存放在内存中的某个地址，再返回到转去执行该函数前的地方。这种转移操作要求在转去前要保护现场并记忆执行的地址，转回后先要恢复现场，并按原来保存地址继续执行。也就是通常说的压栈和出栈。因此，函数调用要有一定的时间和空间方面的开销。那么对于那些函数体代码不是很大，又频繁调用的函数来说，这个时间">
-<meta property="og:updated_time" content="2017-08-18T03:04:05.000Z">
+<meta property="og:description" content="为什么会出现内联函数？要回答这个问题，首先说说方法的调用过程： 调用某个函数实际上将程序执行顺序转移到该方法所存放在内存中的某个地址，再返回到转去执行该函数前的地方。这种转移操作要求在转去前要保护现场并记忆执行的地址，转回后先要恢复现场，并按原来保存地址继续执行。也就是通常说的压栈和出栈。因此，函数调用要有一定的时间和空间方面的开销。那么对于那些函数体代码不是很大，又频繁调用的函数来说，这个时间和">
+<meta property="og:updated_time" content="2017-08-18T03:10:33.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="浅谈 Inline(内联)函数">
-<meta name="twitter:description" content="为什么会出现内联函数？要回答这个问题，首先说说方法的调用过程：  调用某个函数实际上将程序执行顺序转移到该方法所存放在内存中的某个地址，再返回到转去执行该函数前的地方。这种转移操作要求在转去前要保护现场并记忆执行的地址，转回后先要恢复现场，并按原来保存地址继续执行。也就是通常说的压栈和出栈。因此，函数调用要有一定的时间和空间方面的开销。那么对于那些函数体代码不是很大，又频繁调用的函数来说，这个时间">
+<meta name="twitter:description" content="为什么会出现内联函数？要回答这个问题，首先说说方法的调用过程： 调用某个函数实际上将程序执行顺序转移到该方法所存放在内存中的某个地址，再返回到转去执行该函数前的地方。这种转移操作要求在转去前要保护现场并记忆执行的地址，转回后先要恢复现场，并按原来保存地址继续执行。也就是通常说的压栈和出栈。因此，函数调用要有一定的时间和空间方面的开销。那么对于那些函数体代码不是很大，又频繁调用的函数来说，这个时间和">
   
     <link rel="alternate" href="/atom.xml" title="Johnny" type="application/atom+xml">
   
@@ -66,7 +66,7 @@
         <section id="main"><article id="post-java-inline_function" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/08/18/java-inline_function/" class="article-date">
-  <time datetime="2017-08-18T03:04:05.000Z" itemprop="datePublished">2017-08-18</time>
+  <time datetime="2017-08-18T03:10:33.000Z" itemprop="datePublished">2017-08-18</time>
 </a>
     
   </div>
@@ -86,9 +86,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h4 id="为什么会出现内联函数？"><a href="#为什么会出现内联函数？" class="headerlink" title="为什么会出现内联函数？"></a>为什么会出现内联函数？</h4><p>要回答这个问题，首先说说方法的调用过程：</p>
-<blockquote>
 <p>调用某个函数实际上将程序执行顺序转移到该方法所存放在内存中的某个地址，再返回到转去执行该函数前的地方。<br>这种转移操作要求在转去前要保护现场并记忆执行的地址，转回后先要恢复现场，并按原来保存地址继续执行。<br>也就是通常说的压栈和出栈。因此，函数调用要有一定的时间和空间方面的开销。那么对于那些函数体代码不是很大，<br>又频繁调用的函数来说，这个时间和空间的消耗会很大。</p>
-</blockquote>
 <p>那么怎么解决性能消耗的问题呢？</p>
 <p>这个时候需要引入内联函数了。内联函数就是在程序编译时，编译器将程序中出现的内联函数的调用表达式用内联函数的函数体来直接进行替换。<br>显然，这样就不会产生转去转回的问题，但是由于在编译时将函数体中的代码被替代到程序中，因此会增加目标程序代码量，进而增加空间开销，<br>而在时间代销上不象函数调用时那么大，可见它是以目标代码的增加为代价来换取时间的节省。</p>
 <p>写过C++代码的应该都知道，在C++里有个内联函数，使用inline关键字修饰。另外，写在Class定义内的函数也会被编译器视为内联函数。</p>
@@ -100,7 +98,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/08/18/java-inline_function/" data-id="cj6hao9dr0002wqi28vcaocyc" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/08/18/java-inline_function/" data-id="cj6hat9610000zvi2f76y35dc" class="article-share-link">Share</a>
       
       
     </footer>
