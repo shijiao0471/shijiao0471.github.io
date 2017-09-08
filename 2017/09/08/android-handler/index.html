@@ -8,10 +8,10 @@
   <meta name="description" content="等:注意标题最后的等，这个等并不属于Handler消息循环机制，首先我想说的是在实际使用Handler中容易出现的问题，然后再说消息循环机制。  内存泄漏  什么是内存泄漏？Java中的对象(非基本数据类型)通过new关键字分配内存空间，正常情况下对象使用完毕将会释放。但是由于某种原因(短生命周期对象持有一个长生命周期对象)导致该段内存无法释放，一直占用内存单元，我们的程序就无法继续使用该内存。我">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android Handler 消息循环机制源码分析等">
-<meta property="og:url" content="http://yoursite.com/2017/07/07/android-handler/index.html">
+<meta property="og:url" content="http://yoursite.com/2017/09/08/android-handler/index.html">
 <meta property="og:site_name" content="Johnny">
 <meta property="og:description" content="等:注意标题最后的等，这个等并不属于Handler消息循环机制，首先我想说的是在实际使用Handler中容易出现的问题，然后再说消息循环机制。  内存泄漏  什么是内存泄漏？Java中的对象(非基本数据类型)通过new关键字分配内存空间，正常情况下对象使用完毕将会释放。但是由于某种原因(短生命周期对象持有一个长生命周期对象)导致该段内存无法释放，一直占用内存单元，我们的程序就无法继续使用该内存。我">
-<meta property="og:updated_time" content="2017-07-07T08:27:49.000Z">
+<meta property="og:updated_time" content="2017-09-08T08:54:26.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android Handler 消息循环机制源码分析等">
 <meta name="twitter:description" content="等:注意标题最后的等，这个等并不属于Handler消息循环机制，首先我想说的是在实际使用Handler中容易出现的问题，然后再说消息循环机制。  内存泄漏  什么是内存泄漏？Java中的对象(非基本数据类型)通过new关键字分配内存空间，正常情况下对象使用完毕将会释放。但是由于某种原因(短生命周期对象持有一个长生命周期对象)导致该段内存无法释放，一直占用内存单元，我们的程序就无法继续使用该内存。我">
@@ -54,7 +54,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
@@ -65,8 +65,8 @@
       <div class="outer">
         <section id="main"><article id="post-android-handler" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2017/07/07/android-handler/" class="article-date">
-  <time datetime="2017-07-07T08:27:49.000Z" itemprop="datePublished">2017-07-07</time>
+    <a href="/2017/09/08/android-handler/" class="article-date">
+  <time datetime="2017-09-08T08:54:26.000Z" itemprop="datePublished">2017-09-08</time>
 </a>
     
   </div>
@@ -91,7 +91,7 @@
 </ul>
 <h5 id="什么是内存泄漏？"><a href="#什么是内存泄漏？" class="headerlink" title="什么是内存泄漏？"></a>什么是内存泄漏？</h5><p>Java中的对象(非基本数据类型)通过<code>new</code>关键字分配内存空间，正常情况下对象使用完毕将会释放。<br>但是由于某种原因(短生命周期对象持有一个长生命周期对象)导致<br>该段内存无法释放，一直占用内存单元，我们的程序就无法继续使用该内存。我们就称无法被释放的内存为泄漏内存。</p>
 <h5 id="Handler为什么会造成内存泄漏"><a href="#Handler为什么会造成内存泄漏" class="headerlink" title="Handler为什么会造成内存泄漏"></a><code>Handler</code>为什么会造成内存泄漏</h5><p>平时我们怎么声明一个<code>Handler</code>呢？ 通过下面的方式？<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Handler mHandler = new Handler() &#123;</div><div class="line">        @Override</div><div class="line">        public void handleMessage(Message msg) &#123;</div><div class="line">            dosomething();</div><div class="line">        &#125;</div><div class="line">    &#125;;</div></pre></td></tr></table></figure></p>
-<p>这样写其实AndroidStudio 会抛出一个警告，说你这样写会造成内存泄漏。为什么这样的写法会造成内存泄漏呢？<br><code>Java中非静态内部类会持有外部类的引用</code>。如果内部类的生命周期比外部类长，那么外部类就容易造成内存泄漏。<br>回到上面的代码，我们定义的mHandler对象其实是一个匿名类，他会隐式的持有外部类的引用，他可以使用外部类的成员变量<br>，这样就佐证了之前说的非静态内部类会持有外部类的引用。<br>这时候如果子线程使用mHandler将message发送到MessageQueue中并等待执行的过程长，如果这时候activity已经执行了finish方法<br>我们希望的是activity在执行了onDestroy方法后，activity的相关资源被销毁回收，但由于mHandler隐式的持有activity的引用<br>，那么将导致activity对象无法被gc掉，activity相关资源与组件也无法被回收，造成内存泄露。</p>
+<p>这样写其实AndroidStudio 会抛出一个警告，说你这样写会造成内存泄漏。为什么这样的写法会造成内存泄漏呢？<br><code>Java中非静态内部类会持有外部类的引用</code>。如果内部类的生命周期比外部类长，那么外部类就容易造成内存泄漏。<br>回到上面的代码，我们定义的mHandler对象其实是一个匿名类对象，他会隐式的持有外部类的引用，他可以使用外部类的成员变量<br>，这样就佐证了之前说的非静态内部类会持有外部类的引用。<br>这时候如果子线程使用mHandler将message发送到MessageQueue中并等待执行的过程长，如果这时候activity已经执行了finish方法<br>我们希望的是activity在执行了onDestroy方法后，activity的相关资源被销毁回收，但由于mHandler隐式的持有activity的引用<br>，那么将导致activity对象无法被gc掉，activity相关资源与组件也无法被回收，造成内存泄露。</p>
 <p>解决办法：</p>
 <ol>
 <li>使用static静态声明</li>
@@ -103,7 +103,11 @@
 <p>WeakReference弱引用，与强引用（即我们常说的引用）相对，它的特点是，GC在回收时会忽略掉弱引用，即就算有弱引用指向某对象，但只要该对象没有被强引用指向（实际上多数时候还要求没有软引用，但此处软引用的概念可以忽略），该对象就会在被GC检查到时回收掉。对于上面的代码，用户在关闭Activity之后，就算后台线程还没结束，但由于仅有一条来自Handler的弱引用指向Activity，所以GC仍然会在检查的时候把Activity回收掉。这样，内存泄露的问题就不会出现了。</p>
 </blockquote>
 <ol>
-<li>在onDestroy中释放handler<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">mHandler.removeCallbacks();</div><div class="line">mHandler.removeMessages();</div><div class="line">mHandler.removeCallbacksAndMessages();</div></pre></td></tr></table></figure>
+<li><p>在onDestroy中释放handler</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">mHandler.removeCallbacks();</div><div class="line">mHandler.removeMessages();</div><div class="line">mHandler.removeCallbacksAndMessages();</div></pre></td></tr></table></figure>
+</li>
+<li><p>（推荐使用） 让mHandler对象是一个普通对象而非匿名内部类对象。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">private Handler mHandler = new Handler(new Handler.Callback() &#123;</div><div class="line">        @Override</div><div class="line">        public boolean handleMessage(Message msg) &#123;</div><div class="line">            return false;</div><div class="line">        &#125;</div><div class="line">    &#125;);</div></pre></td></tr></table></figure>
 </li>
 </ol>
 <h3 id="Android-Handler-消息循环机制源码分析"><a href="#Android-Handler-消息循环机制源码分析" class="headerlink" title="Android Handler 消息循环机制源码分析:"></a>Android Handler 消息循环机制源码分析:</h3><p>Android源码相关类：</p>
@@ -138,7 +142,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2017/07/07/android-handler/" data-id="cj6hat9650001zvi2x7rwav6o" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2017/09/08/android-handler/" data-id="cj7bndj1b00004ui25mnjrmxs" class="article-share-link">Delen</a>
       
       
     </footer>
@@ -147,19 +151,10 @@
     
 <nav id="article-nav">
   
-    <a href="/2017/07/14/valueAnimator/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          浅谈 Android ValueAnimator
-        
-      </div>
-    </a>
   
-  
-    <a href="/2017/07/06/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">Hello World</div>
+    <a href="/2017/08/31/java_volatile/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Ouder</strong>
+      <div class="article-nav-title">Java Volatile</div>
     </a>
   
 </nav>
@@ -181,9 +176,9 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
+    <h3 class="widget-title">Archieven</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/09/">九月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/08/">八月 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/07/">七月 2017</a></li></ul>
     </div>
   </div>
 
@@ -191,9 +186,17 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
+    <h3 class="widget-title">Recente berichten</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/09/08/android-handler/">Android Handler 消息循环机制源码分析等</a>
+          </li>
+        
+          <li>
+            <a href="/2017/08/31/java_volatile/">Java Volatile</a>
+          </li>
         
           <li>
             <a href="/2017/08/18/java-inline_function/">浅谈 Inline(内联)函数</a>
@@ -201,10 +204,6 @@
         
           <li>
             <a href="/2017/07/14/valueAnimator/">浅谈 Android ValueAnimator</a>
-          </li>
-        
-          <li>
-            <a href="/2017/07/07/android-handler/">Android Handler 消息循环机制源码分析等</a>
           </li>
         
           <li>
